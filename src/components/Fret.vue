@@ -16,7 +16,6 @@ import Note from '../types/Note';
 export default class Fret extends Vue {
   @Prop() note!: Note;
   @Prop() isLast!: boolean;
-  @Prop() fromString!: string;
 
   get selected(): boolean {
     return this.note.selected;
