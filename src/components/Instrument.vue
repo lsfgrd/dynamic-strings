@@ -5,21 +5,24 @@
       <String
         v-for="(stringName, index) in strings"
         :key="`${stringName}-${index}`"
-        :stringName="stringName"
+        :string="stringName"
         :isLast="index === (strings.length - 1)"
         :frets="frets"
         v-on:select-note="getSelectedNotes">
       </String>
     </div>
 
-    Notes: {{ selectedNotes }}
+    Notes: {{ selectedNotes.map(x => x.name) }}
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import { NoteEvent } from '../types/NoteEvent';
+import {
+  Component, Vue, Prop, Watch,
+} from 'vue-property-decorator';
+import Note from '../types/Note';
 import String from './String.vue';
+import InstrumentString from '../types/InstrumentString';
 
 @Component({
   components: {
@@ -27,16 +30,60 @@ import String from './String.vue';
   },
 })
 export default class Instrument extends Vue {
-  @Prop() strings!: string[];
-  @Prop() frets!: number[];
+  @Prop() strings!: InstrumentString[];
+  @Prop() frets!: Note[];
 
-  private selectedNotes: string[] = [];
+  private selectedNotes: Note[] = [];
 
-  getSelectedNotes(event: NoteEvent): void {
-    if (event.selected) {
-      this.selectedNotes.push(event.note);
+  created() {
+    this.setOpenStringsAsSelected();
+  }
+
+  private setOpenStringsAsSelected(): void {
+    this.strings.forEach((string, index) => {
+      const notTheExtraString = index !== this.strings.length - 1;
+
+      if (notTheExtraString) {
+        this.selectedNotes.push(new Note(string.name, true, string));
+      }
+    });
+  }
+
+  @Watch('selectedNotes')
+  private onSelectedNotesChange() {
+    this.strings.forEach((string, index) => {
+      const notTheExtraString = index !== this.strings.length - 1;
+
+      if (notTheExtraString) {
+        if (!this.selectedNotes
+          .filter((selectedNote) => selectedNote.fromString.index === index)[0]) {
+          this.selectedNotes.push(new Note(string.name, true, string));
+        }
+      }
+    });
+  }
+
+  @Watch('frets')
+  private onFretConfigChange() {
+    this.selectedNotes = [];
+  }
+
+  private getSelectedNotes(note: Note): void {
+    if (note.selected) {
+      this.removeExistingSelectedNote(note);
+      this.selectedNotes.push(note);
     } else {
-      this.selectedNotes.splice(this.selectedNotes.lastIndexOf(event.note), 1);
+      this.selectedNotes.splice(this.selectedNotes.lastIndexOf(note), 1);
+    }
+  }
+
+  private removeExistingSelectedNote(note: Note): void {
+    const selectedNoteFromString = this.selectedNotes
+      .filter((selectedNote) => selectedNote.fromString.index === note.fromString.index)[0];
+
+    if (selectedNoteFromString) {
+      selectedNoteFromString.selected = false;
+      this.selectedNotes.splice(this.selectedNotes.lastIndexOf(selectedNoteFromString), 1);
     }
   }
 }

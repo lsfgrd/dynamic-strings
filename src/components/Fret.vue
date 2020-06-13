@@ -1,8 +1,8 @@
 <template>
   <div class="fret">
     <span v-if="!isLast" class="fret-hitbox" v-on:click="onClick()">
-      <div v-if="clicked" class="note">
-        {{note}}
+      <div v-if="selected" class="note">
+        {{note.name}}
       </div>
     </span>
   </div>
@@ -10,20 +10,23 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import { NoteEvent } from 'src/types/NoteEvent';
+import Note from '../types/Note';
 
 @Component
 export default class Fret extends Vue {
-  @Prop() note!: string;
+  @Prop() note!: Note;
   @Prop() isLast!: boolean;
+  @Prop() fromString!: string;
 
-  private clicked = false;
+  get selected(): boolean {
+    return this.note.selected;
+  }
 
   onClick(): void {
-    this.clicked = !this.clicked;
+    this.note.selected = !this.note.selected;
     this.$emit(
       'select-note',
-      { note: this.note, selected: this.clicked } as NoteEvent,
+      this.note,
     );
   }
 }

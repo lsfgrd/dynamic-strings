@@ -1,9 +1,9 @@
 <template>
   <div class="string">
-    <span class="name"> {{stringName}} </span>
+    <span class="name"> {{string.name}} </span>
 
     <Fret
-      v-for="(fret, index) in fretsNames"
+      v-for="(fret, index) in notes"
       :key="`${fret}-${index}`"
       :note="fret"
       :isLast="isLast"
@@ -13,9 +13,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import {
+  Component, Prop, Vue, Watch,
+} from 'vue-property-decorator';
 import Fret from './Fret.vue';
-import { NoteEvent } from '../types/NoteEvent';
+import Note from '../types/Note';
+import InstrumentString from '../types/InstrumentString';
 
 @Component({
   components: {
@@ -23,7 +26,7 @@ import { NoteEvent } from '../types/NoteEvent';
   },
 })
 export default class String extends Vue {
-  @Prop() stringName!: string;
+  @Prop() string!: InstrumentString;
   @Prop() frets!: number[];
   @Prop() isLast!: boolean;
 
@@ -42,24 +45,45 @@ export default class String extends Vue {
     'B',
   ];
 
-  get fretsNames(): string[] {
+  created() {
+    this.notes = this.getNotes();
+  }
+
+  private notes: Note[] = [];
+
+  @Watch('frets')
+  whenFretsUpdate() {
+    this.notes = this.getNotes();
+  }
+
+  getNotes(): Note[] {
     return this.frets.map((fret, fretIndex) => {
-      const stringPosition = this.noteOrder.indexOf(this.stringName); // 9
+      const stringPosition = this.noteOrder.indexOf(this.string.name); // 9
 
       const notePosition = stringPosition + fretIndex + 1;
+
+      const string = new InstrumentString(this.string.name, this.string.index);
       let note;
 
       if (notePosition > 11) {
-        note = this.noteOrder[(stringPosition - 11) + fretIndex + 1];
+        note = new Note(
+          this.noteOrder[(stringPosition - 11) + fretIndex + 1],
+          false,
+          string,
+        );
       } else {
-        note = this.noteOrder[notePosition];
+        note = new Note(
+          this.noteOrder[notePosition],
+          false,
+          string,
+        );
       }
 
       return note;
     });
   }
 
-  onSelectNote(event: NoteEvent): void {
+  onSelectNote(event: Note): void {
     this.$emit('select-note', event);
   }
 }

@@ -21,6 +21,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import Instrument from './Instrument.vue';
+import InstrumentString from '../types/InstrumentString';
 
 @Component({
   components: {
@@ -31,7 +32,7 @@ export default class Main extends Vue {
   fretNumber = 0;
   stringsNames = 'GDAE';
 
-  strings: string[] = [];
+  strings: InstrumentString[] = [];
   frets: number[] = [];
 
   createGrid(strings: string, frets: number): void {
@@ -39,7 +40,7 @@ export default class Main extends Vue {
     this.frets = [];
 
     for (let i = 0; i <= strings.length; i += 1) {
-      this.strings.push(strings[i]);
+      this.strings.push(new InstrumentString(strings[i], i));
     }
 
     for (let i = 1; i <= frets; i += 1) {
