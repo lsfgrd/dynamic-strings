@@ -6,9 +6,11 @@
         v-for="(stringName, index) in strings"
         :key="`${stringName}-${index}`"
         :string="stringName"
-        :isLast="index === (strings.length - 1)"
         :frets="frets"
         v-on:select-note="getSelectedNotes">
+      </String>
+
+      <String v-if="frets.length > 0" :frets="frets" :mute="true">
       </String>
     </div>
 
@@ -40,25 +42,17 @@ export default class Instrument extends Vue {
   }
 
   private setOpenStringsAsSelected(): void {
-    this.strings.forEach((string, index) => {
-      const notTheExtraString = index !== this.strings.length - 1;
-
-      if (notTheExtraString) {
-        this.selectedNotes.push(new Note(string.name, true, string));
-      }
+    this.strings.forEach((string) => {
+      this.selectedNotes.push(new Note(string.name, true, string));
     });
   }
 
   @Watch('selectedNotes')
   private onSelectedNotesChange() {
     this.strings.forEach((string, index) => {
-      const notTheExtraString = index !== this.strings.length - 1;
-
-      if (notTheExtraString) {
-        if (!this.selectedNotes
-          .filter((selectedNote) => selectedNote.fromString.index === index)[0]) {
-          this.selectedNotes.push(new Note(string.name, true, string));
-        }
+      if (!this.selectedNotes
+        .filter((selectedNote) => selectedNote.fromString.index === index)[0]) {
+        this.selectedNotes.push(new Note(string.name, true, string));
       }
     });
   }

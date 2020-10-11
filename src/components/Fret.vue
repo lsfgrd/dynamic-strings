@@ -1,6 +1,6 @@
 <template>
   <div class="fret">
-    <span v-if="!isLast" class="fret-hitbox" v-on:click="onClick()">
+    <span v-if="!mute" class="fret-hitbox" v-on:click="onClick()">
       <div v-if="selected" class="note">
         {{note.name}}
       </div>
@@ -15,7 +15,7 @@ import Note from '../types/Note';
 @Component
 export default class Fret extends Vue {
   @Prop() note!: Note;
-  @Prop() isLast!: boolean;
+  @Prop() mute!: boolean;
 
   get selected(): boolean {
     return this.note.selected;

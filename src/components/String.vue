@@ -1,13 +1,13 @@
 <template>
   <div class="string">
-    <span class="name"> {{string.name}} </span>
+    <span class="name" v-if="string"> {{string.name}} </span>
 
     <Fret
       v-for="(fret, index) in notes"
       :key="`${fret}-${index}`"
       :note="fret"
-      :isLast="isLast"
-      v-on:select-note="onSelectNote">
+      v-on:select-note="onSelectNote"
+      :mute="mute">
     </Fret>
   </div>
 </template>
@@ -28,7 +28,7 @@ import InstrumentString from '../types/InstrumentString';
 export default class String extends Vue {
   @Prop() string!: InstrumentString;
   @Prop() frets!: number[];
-  @Prop() isLast!: boolean;
+  @Prop() mute!: boolean;
 
   private noteOrder = [
     'C',
@@ -58,11 +58,11 @@ export default class String extends Vue {
 
   getNotes(): Note[] {
     return this.frets.map((fret, fretIndex) => {
-      const stringPosition = this.noteOrder.indexOf(this.string.name); // 9
+      const stringPosition = this.noteOrder.indexOf(this.string?.name); // 9
 
       const notePosition = stringPosition + fretIndex + 1;
 
-      const string = new InstrumentString(this.string.name, this.string.index);
+      const string = new InstrumentString(this.string?.name, this.string?.index);
       let note;
 
       if (notePosition > 11) {
@@ -102,14 +102,6 @@ export default class String extends Vue {
 .string:first-of-type {
   border-bottom: 2px solid black;
   border-top: 1px solid red;
-  border-left: 1px solid red;
-  border-right: 1px solid red;
-}
-
-
-.string:last-of-type {
-  border-top: 2px solid black;
-  border-bottom: 1px solid red;
   border-left: 1px solid red;
   border-right: 1px solid red;
 }

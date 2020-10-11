@@ -39,7 +39,7 @@ export default class Main extends Vue {
     this.strings = [];
     this.frets = [];
 
-    for (let i = 0; i <= strings.length; i += 1) {
+    for (let i = 0; i < strings.length; i += 1) {
       this.strings.push(new InstrumentString(strings[i], i));
     }
 
@@ -50,7 +50,7 @@ export default class Main extends Vue {
     this.frets = [...this.frets];
   }
 
-  invert() {
+  invert(): void {
     this.stringsNames = this.stringsNames.split('').reverse().join('');
   }
 }
